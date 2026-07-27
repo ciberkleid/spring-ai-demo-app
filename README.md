@@ -4,15 +4,32 @@ REST endpoints demonstrating Spring AI features, in order.
 
 ## Setup
 
+In one terminal window, start the application:
 ```bash
-brew install ollama
-ollama serve &
-ollama pull mistral
 direnv allow      # or: source .envrc
 ./mvnw spring-boot:run
 ```
 
-`GET /` lists all demos below.
+In another terminal window, start ollama:
+```bash
+ollama serve
+```
+
+In a third terminal window, load the model:
+```bash
+direnv allow      # or: source .envrc
+ollama pull ${SPRING_AI_OLLAMA_CHAT_OPTIONS_MODEL}
+```
+
+Wait for the model pull to finish.
+Endpoints are documented via Swagger/OpenAPI (springdoc-openapi); opening
+http://localhost:8080 redirects there:
+```bash
+clear && echo -e "\n########## OPENAPI SPEC ##########\n"
+http :8080/v3/api-docs   # or: open http://localhost:8080
+```
+
+In the same terminal window, you can run each of the demos below.
 
 ## Demos
 
