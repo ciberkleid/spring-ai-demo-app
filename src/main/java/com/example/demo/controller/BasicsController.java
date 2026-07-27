@@ -21,8 +21,15 @@ public class BasicsController {
 
 	private final ChatClient chatClient;
 
-	@Value("classpath:spring-io-2025-schedule.md")
+	@Value("classpath:spring-io-2026-schedule.md")
 	private Resource conferenceAgenda;
+
+    // Trimmed content option for local ollama models for faster demo responses.
+	@Value("classpath:spring-io-2026-schedule-trimmed.md")
+	private Resource conferenceAgendaTrimmed;
+
+	@Value("classpath:fifa-world-cup-2026-results.md")
+	private Resource worldCupResults;
 
 	public BasicsController(ChatClient chatClient) {
 		this.chatClient = chatClient;
@@ -46,16 +53,31 @@ public class BasicsController {
 	}
 
 	@GetMapping("/prompt-stuffing")
-	public List<Track> promptStuffing() {
+	public List<Track> promptStuffing(@RequestParam(defaultValue = "true") boolean trimmed) {
+        // Use trimmed content with local ollama models for faster demo responses.
+		Resource agenda = trimmed ? conferenceAgendaTrimmed : conferenceAgenda;
 		return chatClient.prompt()
 			.system("You are a useful assistant. Follow the user instructions.")
 			.user(u -> u.text("""
 					Get the list of talks grouped by tracks :
 					{additionalContext}.
-					List only the sessions with more than 1 speakers""").param("additionalContext", asText(conferenceAgenda)))
+					List only the sessions with more than 1 speakers""").param("additionalContext", asText(agenda)))
 			.call()
 			.entity(new ParameterizedTypeReference<List<Track>>() {
 			});
+	}
+
+	@GetMapping("/prompt-stuffing-world-cup")
+	public String promptStuffingWorldCup() {
+		return chatClient.prompt()
+			.system("You are an enthusiastic soccer commentator sharing tournament trivia with fellow fans.")
+			.user(u -> u.text("""
+					Here are the complete results of the FIFA World Cup 2026 :
+					{results}.
+					In 100 words, or less, share the tournament highlights and a few fun facts and stats that a soccer fan would enjoy.""")
+				.param("results", asText(worldCupResults)))
+			.call()
+			.content();
 	}
 
 	private static String asText(Resource resource) {

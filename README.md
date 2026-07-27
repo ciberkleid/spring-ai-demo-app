@@ -67,10 +67,24 @@ bat -n -r 16:31 -H 19 -H 21 -H 28 src/main/java/com/example/demo/controller/Chat
 
 ### 4. Prompt stuffing — system prompt + structured output + a document manually pasted into the prompt
 ```bash
-curl localhost:8080/api/basics/prompt-stuffing
+# bat -n -r 48:59 -H 55 src/main/java/com/example/demo/controller/BasicsController.java
+idea --line 55 src/main/java/com/example/demo/controller/BasicsController.java
+idea --line 1 src/main/resources/spring-io-2026-schedule.md
 ```
 ```bash
-bat -n -r 48:59 -H 55 src/main/java/com/example/demo/controller/BasicsController.java
+clear && echo -e "\n########## PROMPT STUFFING (trimmed document) ##########\n"
+http :8080/api/basics/prompt-stuffing     # Use with ollama, trimmed doc for faster result
+```
+```bash
+clear && echo -e "\n########## PROMPT STUFFING (full document) ##########\n"
+http :8080/api/basics/prompt-stuffing trimmed==false     # Use with more powerful models
+```
+```bash
+idea --line 78 src/main/java/com/example/demo/controller/BasicsController.java
+```
+```bash
+clear && echo -e "\n########## PROMPT STUFFING (World Cup fun facts) ##########\n"
+http :8080/api/basics/prompt-stuffing-world-cup
 ```
 
 ### 5. Tool calling — model calls a Java method (weather lookup) to answer
