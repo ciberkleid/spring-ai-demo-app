@@ -7,6 +7,7 @@ import com.example.demo.model.ActorsFilms;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.StructuredOutputValidationAdvisor;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,11 +41,17 @@ public class GuardrailsController {
 			.maxRepeatAttempts(3)
 			.build();
 
-		return chatClient.prompt()
+		String rawResponse = chatClient.prompt()
 			.advisors(validationAdvisor)
 			.user("Generate the filmography of 5 movies for %s.".formatted(actor))
 			.call()
-			.entity(ActorsFilms.class);
+			.content();
+
+		// Some local models (e.g. Mistral via Ollama) wrap JSON responses in a markdown
+		// code fence despite being told not to; strip it before parsing so the demo
+		// works regardless of which chat model provider is configured.
+		return new BeanOutputConverter<>(ActorsFilms.class)
+			.convert(rawResponse.strip().replaceAll("(?s)^```(?:json)?\\s*|\\s*```$", ""));
 	}
 
 }

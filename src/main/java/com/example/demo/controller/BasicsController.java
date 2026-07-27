@@ -7,6 +7,7 @@ import com.example.demo.model.ActorsFilms;
 import com.example.demo.model.Track;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
@@ -46,10 +47,16 @@ public class BasicsController {
 
 	@GetMapping("/structured-output")
 	public ActorsFilms structuredOutput(@RequestParam(defaultValue = "Tom Hanks") String actor) {
-		return chatClient.prompt()
-			.user("Generate the filmography of 5 movies for %s.".formatted(actor))
+		var outputConverter = new BeanOutputConverter<>(ActorsFilms.class);
+
+		String rawResponse = chatClient.prompt()
+			.user(u -> u.text("Generate the filmography of 5 movies for {actor}.\n{format}")
+				.param("actor", actor)
+				.param("format", outputConverter.getFormat()))
 			.call()
-			.entity(ActorsFilms.class);
+			.content();
+
+		return outputConverter.convert(rawResponse);
 	}
 
 	@GetMapping("/prompt-stuffing")
