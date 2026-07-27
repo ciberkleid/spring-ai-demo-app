@@ -52,17 +52,23 @@ bat -n -r 31:38 -H 34 src/main/java/com/example/demo/controller/BasicsController
 ```bash
 curl localhost:8080/api/basics/structured-output
 ```
-```bash
-bat -n -r 40:46 -H 41 -H 45 src/main/java/com/example/demo/controller/BasicsController.java
-```
 
-### 3. Chat memory — stateful conversation (same `conversationId` across calls)
+### 3. Chat memory — same `conversationId` across calls, with and without a memory advisor
 ```bash
-curl "localhost:8080/api/memory/chat?conversationId=demo&message=My%20name%20is%20Christian"
-curl "localhost:8080/api/memory/chat?conversationId=demo&message=What%20is%20my%20name%3F"
+idea --line 30 src/main/java/com/example/demo/controller/ChatMemoryController.java
 ```
 ```bash
-bat -n -r 16:31 -H 19 -H 21 -H 28 src/main/java/com/example/demo/controller/ChatMemoryController.java
+clear && echo -e "\n########## CHAT MEMORY - WITHOUT MEMORY ##########\n"
+http :8080/api/memory/chat message=="My name is Christian"
+http :8080/api/memory/chat message=="What is my name?"
+```
+```bash
+idea --line 39 src/main/java/com/example/demo/controller/ChatMemoryController.java
+```
+```bash
+clear && echo -e "\n########## CHAT MEMORY - WITH MEMORY ##########\n"
+http :8080/api/memory/chat-with-memory conversationId==demo message=="My name is Christian"
+http :8080/api/memory/chat-with-memory conversationId==demo message=="What is my name?"
 ```
 
 ### 4. Prompt stuffing — system prompt + structured output + a document manually pasted into the prompt

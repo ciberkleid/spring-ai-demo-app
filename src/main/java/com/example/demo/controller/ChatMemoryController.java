@@ -15,16 +15,27 @@ public class ChatMemoryController {
 
 	private final ChatClient chatClient;
 
+	private final ChatClient chatClientWithMemory;
+
 	public ChatMemoryController(ChatClient chatClient) {
+		this.chatClient = chatClient;
+
 		var chatMemory = MessageWindowChatMemory.builder().maxMessages(10).build();
-		this.chatClient = chatClient.mutate()
+		this.chatClientWithMemory = chatClient.mutate()
 			.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
 			.build();
 	}
 
 	@GetMapping("/chat")
-	public String chat(@RequestParam String message, @RequestParam(defaultValue = "default") String conversationId) {
+	public String chat(@RequestParam String message) {
 		return chatClient.prompt(message)
+			.call()
+			.content();
+	}
+
+	@GetMapping("/chat-with-memory")
+	public String chatWithMemory(@RequestParam String message, @RequestParam(defaultValue = "default") String conversationId) {
+		return chatClientWithMemory.prompt(message)
 			.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
 			.call()
 			.content();
